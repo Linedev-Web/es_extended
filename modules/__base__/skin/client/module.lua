@@ -89,7 +89,7 @@ function SkinEditor:bindEvents()
   self.onMouseMoveOffest = on('mouse:move:offset', function(offsetX, offsetY, data)
 
     if not self.currentMenu.mouseIn then -- not self.currentMenu.mouseIn => Mouse not inside menu
-      
+
       if data.down[0] then
 
         self.camPolarAngle   = self.camPolarAngle   + offsetX / 5.0;
@@ -118,11 +118,11 @@ function SkinEditor:bindEvents()
   end)
 
   self.onMouseWheel = on('mouse:wheel', function(delta)
-    
+
     if not self.currentMenu.mouseIn then
 
       self.camRadius = self.camRadius + delta * -0.25
-      
+
       if self.camRadius < 0.75 then
         self.camRadius = 0.75
       elseif self.camRadius > 2.5 then
@@ -161,7 +161,7 @@ function SkinEditor:ensurePed()
     self.canEnforceComponents = self.isPedFreemode
 
     if self.isPedPlayer then
-      
+
       self.player = NetworkGetPlayerIndexFromPed(self._ped)
 
       if self.player ~= PlayerId() then
@@ -300,6 +300,12 @@ function SkinEditor:openMenu()
 
   end
 
+  items[#items + 1] = {
+    name = 'exitSkin',
+    label = '>> apply <<',
+    type = 'button'
+  }
+
   self.mainMenu = Menu('skin', {
     title = 'Character',
     float = 'top|left', -- not needed, default value
@@ -313,9 +319,13 @@ function SkinEditor:openMenu()
   end)
 
   self.mainMenu:on('item.click', function(item, index)
-    
+
     if item.component ~= nil then
       self:openComponentMenu(item.component)
+    end
+
+    if item.name == 'exitSkin' then
+      self:stop()
     end
 
   end)
@@ -323,7 +333,7 @@ function SkinEditor:openMenu()
 end
 
 function SkinEditor:onItemChanged(item, prop, val, index)
-  
+
   if prop == 'value' then
 
     if item.name == 'model' then
@@ -339,32 +349,32 @@ function SkinEditor:onItemChanged(item, prop, val, index)
 
         local model  = self.models[val + 1]
         local ped    = self:getPed()
-  
+
         utils.game.requestModel(model, function()
-          
+
           local byName = self.mainMenu:by('name')
 
           SetPlayerModel(self.player, model)
-  
+
           ped = self:getPed()
-          
+
           byName['enforce'].visible = self.isPedFreemode
 
           SetPedDefaultComponentVariation(ped)
           SetModelAsNoLongerNeeded(model)
 
           self:pointBone(self.camTargetBone, self.camTargetBoneOffset)
-  
+
         end)
 
       end)
 
     elseif item.name == 'ensure' then
-    
+
       self.canEnforceComponents = val
 
     end
-  
+
   end
 
 end
@@ -386,16 +396,16 @@ function SkinEditor:setComponentVariation(component, drawableId, textureId, pale
     local enforced    = utils.game.setEnforcedPedComponentVariation(ped, component, drawableId, textureId, paletteId)
 
     for k,v in pairs(enforced) do
-    
+
       local compId = tonumber(k)
-  
+
       for i=1, #v, 1 do
         local forcedComponent     = v[i]
         byComponent[compId].value = forcedComponent[2]
       end
-  
+
     end
-    
+
   else
     SetPedComponentVariation(ped, component, drawableId, textureId, paletteId)
   end
@@ -407,7 +417,7 @@ function SkinEditor:openComponentMenu(comp)
   local cfg = componentConfig[comp]
 
   self.camRadius = cfg.radius
-  
+
   self:pointBone(cfg.bone, cfg.offset)
 
   local items = {}
@@ -445,12 +455,12 @@ function SkinEditor:openComponentMenu(comp)
   }
 
   items[#items + 1] = {name = 'submit', label = '>> apply <<', type = 'button'}
-  
+
   if self.mainMenu.visible then
     self.mainMenu:hide()
   end
 
-  
+
   local menu = Menu('skin.component.' .. GetEnumKey(PED_COMPONENTS, comp), {
     title = label,
     float = 'top|left', -- not needed, default value
@@ -464,13 +474,13 @@ function SkinEditor:openComponentMenu(comp)
   end)
 
   menu:on('item.change', function(item, prop, val, index)
-    
+
     if prop == 'value' then
 
       local byName = menu:by('name')
 
       if item.name == 'drawable' then
-        
+
         drawable   = val
         texture    = 0
         textureMax = GetNumberOfPedTextureVariations(self._ped, comp, drawable)
@@ -483,7 +493,7 @@ function SkinEditor:openComponentMenu(comp)
         texture = val
         byName['texture' ].label = getTextureLabel(texture)
       end
-      
+
 
       self:setComponentVariation(comp, val, texture)
 
@@ -492,15 +502,15 @@ function SkinEditor:openComponentMenu(comp)
   end)
 
   menu:on('item.click', function(item, index)
-    
+
     if item.name == 'submit' then
-      
+
       menu:destroy()
-      
+
       self.currentMenu = self.mainMenu
 
       self.mainMenu:focus()
-      
+
       local ped       = self:getPed()
       local pedCoords = GetEntityCoords(ped)
       local forward   = GetEntityForwardVector(ped)
