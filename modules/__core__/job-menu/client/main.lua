@@ -10,21 +10,14 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
-local HUD = M('game.hud')
+M('events')
 
-module.Init()
-
-ESX.SetTick(function()
+Citizen.CreateThread(function()
 
 	while (ESX.PlayerData == nil) or (ESX.PlayerData.job == nil) do
 		Citizen.Wait(0)
-  end
+    end
 
-
-  while (not HUD.Frame) or (not HUD.Frame.loaded) do
-    Citizen.Wait(0)
-  end
-
-  module.RefreshBossHUD()
+	module.Init()
 
 end)

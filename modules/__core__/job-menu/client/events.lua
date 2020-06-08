@@ -10,21 +10,13 @@
 --   If you redistribute this software, you must link to ORIGINAL repository at https://github.com/ESX-Org/es_extended
 --   This copyright should appear in every part of the project code
 
-local HUD = M('game.hud')
+local Input = M('input')
 
-module.Init()
+local opened = false
 
-ESX.SetTick(function()
+Input.On('released', Input.Groups.MOVE, Input.Controls.SELECT_CHARACTER_FRANKLIN, function(lastPressed)
 
-	while (ESX.PlayerData == nil) or (ESX.PlayerData.job == nil) do
-		Citizen.Wait(0)
-  end
-
-
-  while (not HUD.Frame) or (not HUD.Frame.loaded) do
-    Citizen.Wait(0)
-  end
-
-  module.RefreshBossHUD()
+    opened = not opened
+    module.MenuStatus(opened)
 
 end)
